@@ -39,12 +39,20 @@ PerfCounters::PerfCounters()
     fd_l1_misses_ = open_counter(PERF_TYPE_HARDWARE,
                                   PERF_COUNT_HW_CACHE_MISSES);
 
-    // LLC (last-level cache) read misses
+    // Attempt generic LLC misses first (works natively on Intel)
     fd_llc_misses_ = open_counter(
         PERF_TYPE_HW_CACHE,
         static_cast<std::uint64_t>(PERF_COUNT_HW_CACHE_LL)
             | (static_cast<std::uint64_t>(PERF_COUNT_HW_CACHE_OP_READ)    << 8)
             | (static_cast<std::uint64_t>(PERF_COUNT_HW_CACHE_RESULT_MISS) << 16));
+
+    // Fallback for AMD Zen+ to measure DRAM Accesses
+    if (fd_llc_misses_ == -1) {
+        // Event 0x43: Demand Data Cache Fills by Data Source
+        // Umask 0x48: 0x08 (Local DRAM) | 0x40 (Remote DRAM)
+        constexpr std::uint64_t AMD_DRAM_FILLS_RAW = 0x4843;
+        fd_llc_misses_ = open_counter(PERF_TYPE_RAW, AMD_DRAM_FILLS_RAW);
+    }
 
     fd_branch_mispr_ = open_counter(PERF_TYPE_HARDWARE,
                                      PERF_COUNT_HW_BRANCH_MISSES);
