@@ -30,7 +30,11 @@ public:
     // Read the accumulated counts.  Call after stop().
     Counts read() const;
 
+    // True iff perf_event_open succeeded for every required event.
+    bool available() const { return available_; }
+
 private:
+    bool available_ = false;
     int fd_l1_misses_    = -1;
     int fd_llc_misses_   = -1;
     int fd_branch_mispr_ = -1;
