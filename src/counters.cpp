@@ -10,13 +10,8 @@
 #include <cstdint>
 #include <cstring>
 
-// glibc does not expose perf_event_open directly -> use the raw syscall.
-static int perf_event_open(struct perf_event_attr* attr,
-                            pid_t pid, int cpu, int group_fd,
-                            unsigned long flags)
-{
-    return static_cast<int>(
-        syscall(SYS_perf_event_open, attr, pid, cpu, group_fd, flags));
+static int perf_event_open(struct perf_event_attr* attr, pid_t pid, int cpu, int group_fd, unsigned long flags) {
+    return syscall(SYS_perf_event_open, attr, pid, cpu, group_fd, flags);
 }
 
 // Open a single hardware or hw-cache counter.  Returns -1 on failure.
@@ -36,15 +31,14 @@ static int open_counter(std::uint32_t type, std::uint64_t config)
 PerfCounters::PerfCounters()
 {
     // L1 cache misses
-    fd_l1_misses_ = open_counter(PERF_TYPE_HARDWARE,
-                                  PERF_COUNT_HW_CACHE_MISSES);
+    fd_l1_misses_ = open_counter(PERF_TYPE_HARDWARE, PERF_COUNT_HW_CACHE_MISSES);
 
     // Attempt generic LLC misses first (works natively on Intel)
-    fd_llc_misses_ = open_counter(
-        PERF_TYPE_HW_CACHE,
-        static_cast<std::uint64_t>(PERF_COUNT_HW_CACHE_LL)
-            | (static_cast<std::uint64_t>(PERF_COUNT_HW_CACHE_OP_READ)    << 8)
-            | (static_cast<std::uint64_t>(PERF_COUNT_HW_CACHE_RESULT_MISS) << 16));
+    uint64_t llc_config = (PERF_COUNT_HW_CACHE_LL) |
+                          (PERF_COUNT_HW_CACHE_OP_READ << 8) |
+                          (PERF_COUNT_HW_CACHE_RESULT_MISS << 16);
+                          
+    fd_llc_misses_ = open_counter(PERF_TYPE_HW_CACHE, llc_config);
 
     // Fallback for AMD Zen+ to measure DRAM Accesses
     if (fd_llc_misses_ == -1) {
@@ -54,12 +48,9 @@ PerfCounters::PerfCounters()
         fd_llc_misses_ = open_counter(PERF_TYPE_RAW, AMD_DRAM_FILLS_RAW);
     }
 
-    fd_branch_mispr_ = open_counter(PERF_TYPE_HARDWARE,
-                                     PERF_COUNT_HW_BRANCH_MISSES);
-    fd_cycles_       = open_counter(PERF_TYPE_HARDWARE,
-                                     PERF_COUNT_HW_CPU_CYCLES);
-    fd_instructions_ = open_counter(PERF_TYPE_HARDWARE,
-                                     PERF_COUNT_HW_INSTRUCTIONS);
+    fd_branch_mispr_ = open_counter(PERF_TYPE_HARDWARE, PERF_COUNT_HW_BRANCH_MISSES);
+    fd_cycles_       = open_counter(PERF_TYPE_HARDWARE, PERF_COUNT_HW_CPU_CYCLES);
+    fd_instructions_ = open_counter(PERF_TYPE_HARDWARE, PERF_COUNT_HW_INSTRUCTIONS);
 
     available_ = (fd_l1_misses_    != -1 && fd_llc_misses_   != -1 &&
                   fd_branch_mispr_ != -1 && fd_cycles_        != -1 &&
@@ -67,15 +58,10 @@ PerfCounters::PerfCounters()
 
     if (!available_) {
         // Close any descriptors that did open before we hit a failure.
-        const std::array<int, 5> fds{
-            fd_l1_misses_, fd_llc_misses_, fd_branch_mispr_,
-            fd_cycles_,    fd_instructions_
-        };
-        for (int fd : fds) {
-            if (fd != -1) ::close(fd);
+        for (int fd : {fd_l1_misses_, fd_llc_misses_, fd_branch_mispr_, fd_cycles_, fd_instructions_}) {
+            if (fd != -1) close(fd);
         }
-        fd_l1_misses_ = fd_llc_misses_ = fd_branch_mispr_ =
-        fd_cycles_    = fd_instructions_ = -1;
+        fd_l1_misses_ = fd_llc_misses_ = fd_branch_mispr_ = fd_cycles_ = fd_instructions_ = -1;
     }
 }
 
@@ -83,9 +69,8 @@ PerfCounters::~PerfCounters()
 {
     if (!available_) return;
     for (int fd : {fd_l1_misses_, fd_llc_misses_, fd_branch_mispr_,
-                   fd_cycles_,    fd_instructions_})
-    {
-        ::close(fd);
+                   fd_cycles_,    fd_instructions_}) {
+        close(fd);
     }
 }
 
@@ -93,10 +78,9 @@ void PerfCounters::start()
 {
     if (!available_) return;
     for (int fd : {fd_l1_misses_, fd_llc_misses_, fd_branch_mispr_,
-                   fd_cycles_,    fd_instructions_})
-    {
-        ::ioctl(fd, PERF_EVENT_IOC_RESET,  0);
-        ::ioctl(fd, PERF_EVENT_IOC_ENABLE, 0);
+                   fd_cycles_,    fd_instructions_}) {
+        ioctl(fd, PERF_EVENT_IOC_RESET,  0);
+        ioctl(fd, PERF_EVENT_IOC_ENABLE, 0);
     }
 }
 
@@ -104,9 +88,8 @@ void PerfCounters::stop()
 {
     if (!available_) return;
     for (int fd : {fd_l1_misses_, fd_llc_misses_, fd_branch_mispr_,
-                   fd_cycles_,    fd_instructions_})
-    {
-        ::ioctl(fd, PERF_EVENT_IOC_DISABLE, 0);
+                   fd_cycles_,    fd_instructions_}) {
+        ioctl(fd, PERF_EVENT_IOC_DISABLE, 0);
     }
 }
 
@@ -127,3 +110,4 @@ Counts PerfCounters::read() const
     c.instructions = rd(fd_instructions_);
     return c;
 }
+
