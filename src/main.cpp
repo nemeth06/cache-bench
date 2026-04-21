@@ -4,6 +4,7 @@
 #include "print.hpp"
 
 #include "benchmarks/vector_vs_list.hpp"
+#include "benchmarks/matrix.hpp"
 
 #include <iostream>
 #include <vector>
@@ -24,7 +25,7 @@ int main()
     BenchmarkRunner runner;
 
     runner.add_plugin<VectorVsList>();
-
+    runner.add_plugin<MatrixTraversal>();
 
     // Run all pairs and collect results
     std::vector<BenchmarkResult> results;
@@ -40,12 +41,6 @@ int main()
     }
 
     // Print results
-
     print_table(results);
-
-    for(auto& i : results){
-        std::cout << i.group << " " << i.name << " " << i.time_ms << " " << i.l1_misses << " " << i.llc_misses 
-            << " " << i.branch_mispr << std::endl;
-    }
     
 }
