@@ -5,6 +5,7 @@
 
 #include "benchmarks/vector_vs_list.hpp"
 #include "benchmarks/matrix.hpp"
+#include "benchmarks/aos_vs_soa.hpp"
 
 #include <iostream>
 #include <vector>
@@ -26,7 +27,8 @@ int main()
 
     runner.add_plugin<VectorVsList>();
     runner.add_plugin<MatrixTraversal>();
-
+    runner.add_plugin<AosVsSoa>();
+    
     // Run all pairs and collect results
     std::vector<BenchmarkResult> results;
     results.reserve(runner.pairs().size() * 2);
