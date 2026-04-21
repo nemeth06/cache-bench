@@ -7,6 +7,7 @@
 #include "benchmarks/matrix.hpp"
 #include "benchmarks/aos_vs_soa.hpp"
 #include "benchmarks/segtree.hpp"
+#include "benchmarks/predecessor.hpp"
 
 #include <iostream>
 #include <vector>
@@ -31,6 +32,10 @@ int main()
     runner.add_plugin<Segtree>();
     runner.add_plugin<MatrixTraversal>();
 
+    runner.add_plugin<PredecessorBench<500>>(1, 5);
+    runner.add_plugin<PredecessorBench<2000>>(1, 5);
+    runner.add_plugin<PredecessorBench<10000>>(1, 5);
+    runner.add_plugin<PredecessorBench<50000>>(1, 5);
 
     // Run all pairs and collect results
     std::vector<BenchmarkResult> results;
