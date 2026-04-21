@@ -25,3 +25,23 @@ inline void flush_cache()
         sink = buf[i];
     (void)sink;
 }
+
+
+// Format a non-negative integer with thousands separators.
+// Returns "--" for negative values (used when counters are unavailable).
+inline std::string fmt_int(long long n) {
+    if (n < 0) return "--";
+    
+    std::string s = std::to_string(n);
+    for (int i = s.length() - 3; i > 0; i -= 3) {
+        s.insert(i, ",");
+    }
+    return s;
+}
+
+// Format a floating-point value to a fixed number of decimal places.
+inline std::string fmt_fp(double v, int decimals = 1) {
+    std::ostringstream ss;
+    ss << std::fixed << std::setprecision(decimals) << v;
+    return ss.str();
+}

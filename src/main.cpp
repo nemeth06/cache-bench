@@ -1,6 +1,7 @@
 #include "counters.hpp"
 #include "harness.hpp"
 #include "plugin.hpp"
+#include "print.hpp"
 
 #include "benchmarks/vector_vs_list.hpp"
 
@@ -39,6 +40,9 @@ int main()
     }
 
     // Print results
+
+    print_table(results);
+
     for(auto& i : results){
         std::cout << i.group << " " << i.name << " " << i.time_ms << " " << i.l1_misses << " " << i.llc_misses 
             << " " << i.branch_mispr << std::endl;
