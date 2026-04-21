@@ -98,6 +98,7 @@ If your loop only touches one field of a struct, consider whether your data layo
 Both implementations share the same $O(\log n)$ asymptotic complexity per query. The recursive version allocates each tree node individually on the heap. During a query, the traversal begins at the root. The top levels of the tree are accessed frequently and remain "hot" in the L1 or L2 cache. However, as the traversal descends into the wider, lower levels of the tree (spanning roughly 20 levels for $N=1,000,000$), the memory access pattern becomes sparse. Following pointers at these lower levels results in cache misses.
 
 The iterative version stores the entire tree in a flat `std::vector`. The root is at index 1, and the children of node $k$ are always at $2k$ and $2k+1$. Nodes accessed during a query are spatially grouped, allowing adjacent accesses to share 64-byte cache lines. 
+
 ---
 
 ### 4 — Row-major vs column-major matrix traversal
@@ -111,6 +112,7 @@ C++ stores 2D arrays in row-major order. The element at `(r, c)` is at address `
 Iterating `for r: for c:` (row-major) accesses elements sequentially. The hardware prefetcher loads upcoming cache lines before they are needed.
 
 Iterating `for c: for r:` (column-major) steps through memory in strides of 16 KB. Each access lands in a completely different cache line. Because the matrix exceeds the Last Level Cache capacity, these cache lines are evicted before the outer loop advances to the next column. The prefetcher cannot assist, resulting in catastrophic LLC misses.
+
 ---
 
 ### 5 — Predecessor query: sorted vector vs `std::map`
