@@ -61,7 +61,7 @@ Without this, the suite still runs and shows timing data with `--` in the counte
 
 ## The benchmarks
 
-### 1 - `std::vector` vs `std::list`
+### 1 `std::vector` vs `std::list`
 
 **What it does:** Sums one million integers stored either in a `std::vector` or a `std::list`.
 
@@ -75,7 +75,7 @@ Furthermore, to simulate real-world memory fragmentation, this benchmark explici
 
 ---
 
-### 2 - Array of Structs vs Struct of Arrays
+### 2 Array of Structs vs Struct of Arrays
 
 **What it does:** Sums only the `x` field of one million four-field particles (`x, y, z, w`).
 
@@ -89,7 +89,7 @@ If your loop only touches one field of a struct, consider whether your data layo
 
 ---
 
-### 3 - Recursive vs iterative segment tree
+### 3 Recursive vs iterative segment tree
 
 **What it does:** Answers 100,000 random range-sum queries on an array of one million elements.
 
@@ -101,7 +101,7 @@ The iterative version stores the entire tree in a flat `std::vector`. The root i
 
 ---
 
-### 4 - Row-major vs column-major matrix traversal
+### 4 Row-major vs column-major matrix traversal
 
 **What it does:** Sums all elements of a 2048×2048 integer matrix, either row-by-row or column-by-column.
 
@@ -115,7 +115,7 @@ Iterating `for c: for r:` (column-major) steps through memory in strides of 16 K
 
 ---
 
-### 5 - Predecessor query: sorted vector vs `std::map`
+### 5 Predecessor query: sorted vector vs `std::map`
 
 **What it does:** Inserts $N$ integers one at a time into an ordered container, and after each insertion finds the largest element already present that is less than or equal the new value (a predecessor query). Runs at $N = 500$, $2000$, $10000$, and $50000$.
 
