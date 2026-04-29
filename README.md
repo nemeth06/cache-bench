@@ -47,10 +47,10 @@ cmake -B build && cmake --build build
 Full counter data requires either:
 
 ```bash
-# Option 1 — run as root
+# Option 1 - run as root
 sudo ./build/cache-bench
 
-# Option 2 — lower the paranoia level (persists until reboot)
+# Option 2 - lower the paranoia level (persists until reboot)
 echo 1 | sudo tee /proc/sys/kernel/perf_event_paranoid
 ./build/cache-bench
 ```
@@ -61,7 +61,7 @@ Without this, the suite still runs and shows timing data with `--` in the counte
 
 ## The benchmarks
 
-### 1 — `std::vector` vs `std::list`
+### 1 - `std::vector` vs `std::list`
 
 **What it does:** Sums one million integers stored either in a `std::vector` or a `std::list`.
 
@@ -75,13 +75,13 @@ Furthermore, to simulate real-world memory fragmentation, this benchmark explici
 
 ---
 
-### 2 — Array of Structs vs Struct of Arrays
+### 2 - Array of Structs vs Struct of Arrays
 
 **What it does:** Sums only the `x` field of one million four-field particles (`x, y, z, w`).
 
 **What to look at:** The L1 Miss and LLC Miss columns.
 
-In the Array-of-Structs layout, each element in memory looks like: `[x][y][z][w][x][y][z][w]...`. To read all the `x` values, the CPU loads a cache line containing `x, y, z, w` together — but the loop only uses `x` and discards the rest. Three quarters of every cache line fetched is wasted bandwidth.
+In the Array-of-Structs layout, each element in memory looks like: `[x][y][z][w][x][y][z][w]...`. To read all the `x` values, the CPU loads a cache line containing `x, y, z, w` together - but the loop only uses `x` and discards the rest. Three quarters of every cache line fetched is wasted bandwidth.
 
 In the Struct-of-Arrays layout, all `x` values are stored together: `[x][x][x]...[x]` followed by `[y][y]...`. Reading only `x` loads cache lines that are 100% useful data. The LLC miss count drops dramatically.
 
@@ -89,7 +89,7 @@ If your loop only touches one field of a struct, consider whether your data layo
 
 ---
 
-### 3 — Recursive vs iterative segment tree
+### 3 - Recursive vs iterative segment tree
 
 **What it does:** Answers 100,000 random range-sum queries on an array of one million elements.
 
@@ -101,7 +101,7 @@ The iterative version stores the entire tree in a flat `std::vector`. The root i
 
 ---
 
-### 4 — Row-major vs column-major matrix traversal
+### 4 - Row-major vs column-major matrix traversal
 
 **What it does:** Sums all elements of a 2048×2048 integer matrix, either row-by-row or column-by-column.
 
@@ -115,7 +115,7 @@ Iterating `for c: for r:` (column-major) steps through memory in strides of 16 K
 
 ---
 
-### 5 — Predecessor query: sorted vector vs `std::map`
+### 5 - Predecessor query: sorted vector vs `std::map`
 
 **What it does:** Inserts $N$ integers one at a time into an ordered container, and after each insertion finds the largest element already present that is less than or equal the new value (a predecessor query). Runs at $N = 500$, $2000$, $10000$, and $50000$.
 
@@ -183,7 +183,7 @@ Your benchmark pair appears as a new group in the table.
 ### Tips for meaningful benchmarks
 
 - **Use `do_not_optimize()`** on any result your function computes. Without it, the compiler may detect that the output is unused and remove the entire computation.
-- **Build your data structures outside `run_a`/`run_b`** using static or global variables initialised at startup. The benchmark harness already flushes the cache between iterations — you do not need to, and rebuilding the data structure inside the timed function will obscure the result.
+- **Build your data structures outside `run_a`/`run_b`** using static or global variables initialised at startup. The benchmark harness already flushes the cache between iterations - you do not need to, and rebuilding the data structure inside the timed function will obscure the result.
 - **Keep both implementations doing the same logical work** so the comparison is fair.
 - **Use `warmup = 3, iterations = 20`** (the defaults) for most benchmarks. Increase iterations for very fast functions (< 0.1 ms) where clock noise is significant.
 
